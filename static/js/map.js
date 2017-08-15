@@ -399,6 +399,8 @@ function initSidebar() {
     $('#max-level-gyms-filter-switch').val(Store.get('maxGymLevel'))
     $('#last-update-gyms-switch').val(Store.get('showLastUpdatedGymsOnly'))
     $('#pokemon-switch').prop('checked', Store.get('showPokemon'))
+    $('#pokemon-settings-wrapper').toggle(Store.get('showPokemon'))
+    $('#pokemon-scale-by-rarity-switch').prop('checked', Store.get('scaleByRarity'))
     $('#pokestops-switch').prop('checked', Store.get('showPokestops'))
     $('#lured-pokestops-only-switch').val(Store.get('showLuredPokestopsOnly'))
     $('#lured-pokestops-only-wrapper').toggle(Store.get('showPokestops'))
@@ -577,12 +579,15 @@ function pokemonLabel(item) {
             var iv = getIv(atk, def, sta)
         }
 
+        var iv_circle = cssPercentageCircle(`${iv.toFixed(0)}<br>%`, iv, 100, 82, 66, 51)
+        var level_circle = cssPercentageCircle(`Lvl<br>${pokemonLevel}`, pokemonLevel, 30, 25, 20, 10)
+
         contentstring += `
           <div class='pokemon container'>
             <div class='pokemon container content-left'>
               <div>
                 <img class='pokemon sprite' src='static/icons/${id}.png'>
-                <span class='pokemon'>Level: </span><span class='pokemon'>${pokemonLevel}</span>
+                <span class='pokemon'>CP: </span><span class='pokemon encounter'>${cp}</span>
                 <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
                 <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
                 <span class='pokemon links remove'><a href='javascript:removePokemonMarker("${encounterId}")'>Remove</a></span>
@@ -594,17 +599,19 @@ function pokemonLabel(item) {
                 <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left
               </div>
               <div class='pokemon'>
-                CP: <span class='pokemon encounter'>${cp}/${iv.toFixed(1)}%</span> (A${atk}/D${def}/S${sta})
+                ${iv_circle}
+                (A <span class='pokemon encounter'>${atk}</span> | D <span class='pokemon encounter'>${def}</span> | S <span class='pokemon encounter'>${sta}</span>)
+                ${level_circle}
               </div>
               <div class='pokemon'>
-                Moveset: <span class='pokemon encounter'>${pMove1}/${pMove2}</span>
+                Moveset: <span class='pokemon encounter'>${pMove1}</span> / <span class='pokemon encounter'>${pMove2}</span>
               </div>
               ${movesetRating}
               <div class='pokemon'>
                 Weight: ${weight.toFixed(2)}kg | Height: ${height.toFixed(2)}m
               </div>
               ${catchProbs}
-              <div>
+              <div class='pokemon'>
                 <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
               </div>
           </div>
@@ -616,7 +623,6 @@ function pokemonLabel(item) {
         <div class='pokemon container content-left'>
           <div>
             <img class='pokemon sprite' src='static/icons/${id}.png'>
-            <span class='pokemon'>Level: </span><span class='pokemon no-encounter'>n/a</span>
             <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
             <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
             <span class='pokemon links remove'><a href='javascript:removePokemonMarker("${encounterId}")'>Remove</a></span>
@@ -629,15 +635,9 @@ function pokemonLabel(item) {
             <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left
           </div>
           <div class='pokemon'>
-            CP: <span class='pokemon no-encounter'>No information</span>
+            <span class='pokemon no-encounter'>No IV/CP information</span>
           </div>
           <div class='pokemon'>
-            Moveset: <span class='pokemon no-encounter'>No information</span>
-          </div>
-          <div class='pokemon'>
-            Weight: <span class='pokemon no-encounter'>n/a</span> | Height: <span class='pokemon no-encounter'>n/a</span>
-          </div>
-          <div>
             <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
           </div>
           <div id='scoutInfo${encounterIdLong}' class='pokemon scoutinfo'></div>
@@ -2765,6 +2765,26 @@ $(function () {
     $('#pokemon-switch').change(function () {
         buildSwitchChangeListener(mapData, ['pokemons'], 'showPokemon').bind(this)()
         markerCluster.repaint()
+    })
+    $('#pokemon-scale-by-rarity-switch').change(function () {
+        // Change and store the flag
+        Store.set('scaleByRarity', this.checked)
+        // Remove all Pokemon markers from map
+        var oldPokeMarkers = []
+        $.each(mapData['pokemons'], function (key, pkm) {
+            // for any marker you're turning off, you'll want to wipe off the range
+            if (pkm.marker.rangeCircle) {
+                pkm.marker.rangeCircle.setMap(null)
+                delete pkm.marker.rangeCircle
+            }
+            pkm.marker.setMap(null)
+            oldPokeMarkers.push(pkm.marker)
+        })
+        markerCluster.removeMarkers(oldPokeMarkers)
+        mapData['pokemons'] = {}
+        // Reload all Pokemon
+        lastpokemon = false
+        updateMap()
     })
     $('#scanned-switch').change(function () {
         buildSwitchChangeListener(mapData, ['scanned'], 'showScanned').bind(this)()

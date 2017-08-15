@@ -1009,6 +1009,10 @@ var StoreOptions = {
     'processPokemonIntervalMs': {
         default: 100,
         type: StoreTypes.Number
+    },
+    'scaleByRarity': {
+        default: true,
+        type: StoreTypes.Boolean
     }
 }
 
@@ -1070,7 +1074,7 @@ function getGoogleSprite(index, sprite, displayHeight) {
     }
 }
 
-function setupPokemonMarkerDetails(item, map, scaleByRarity = true) {
+function setupPokemonMarkerDetails(item, map, scaleByRarity) {
     const pokemonIndex = item['pokemon_id'] - 1
     const sprite = pokemonSprites
 
@@ -1080,7 +1084,7 @@ function setupPokemonMarkerDetails(item, map, scaleByRarity = true) {
 
     var iconSize = (map.getZoom() - 3) * (map.getZoom() - 3) * 0.2 + Store.get('iconSizeModifier')
 
-    if (scaleByRarity) {
+    if (Store.get('scaleByRarity') && scaleByRarity !== false) {
         const rarityValues = {
             'very rare': 30,
             'ultra rare': 40,
@@ -1107,7 +1111,7 @@ function setupPokemonMarkerDetails(item, map, scaleByRarity = true) {
     return markerDetails
 }
 
-function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity = true) {
+function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity) {
     // Scale icon size up with the map exponentially, also size with rarity.
     const markerDetails = setupPokemonMarkerDetails(item, map, scaleByRarity)
     const icon = markerDetails.icon
@@ -1125,7 +1129,7 @@ function setupPokemonMarker(item, map, isBounceDisabled, scaleByRarity = true) {
     return marker
 }
 
-function updatePokemonMarker(item, map, scaleByRarity = true) {
+function updatePokemonMarker(item, map, scaleByRarity) {
     // Scale icon size up with the map exponentially, also size with rarity.
     const markerDetails = setupPokemonMarkerDetails(item, map, scaleByRarity)
     const icon = markerDetails.icon
@@ -1142,4 +1146,41 @@ function isTouchDevice() {
 function isMobileDevice() {
     //  Basic mobile OS (not browser) detection
     return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+}
+
+function cssPercentageCircle(text, value, perfect_val, good_val, ok_val, meh_val) {
+    // Ring color
+    var ring_color
+    if (value == perfect_val) {
+        ring_color = 'lime'
+    } else if (value >= good_val) {
+        ring_color = 'green'
+    } else if (value >= ok_val) {
+        ring_color = 'olive'
+    } else if (value >= meh_val) {
+        ring_color = 'orange'
+    } else {
+        ring_color = 'red'
+    }
+
+    // CSS styles
+    var percentage = value * 100 / perfect_val
+    var deg = 360 * percentage / 100
+    var circle_styles
+    if (deg <= 180) {
+        circle_styles = `background-color: ${ring_color};
+            background-image: linear-gradient(${90+deg}deg, transparent 50%, Gainsboro 50%),
+                              linear-gradient(90deg, Gainsboro 50%, transparent 50%)');`
+    } else {
+        circle_styles = `background-color: ${ring_color};
+            background-image: linear-gradient(${deg-90}deg, transparent 50%, ${ring_color} 50%),
+                              linear-gradient(90deg, Gainsboro 50%, transparent 50%)');`
+    }
+
+    // HTML output
+    return `<div class="active-border" style='${circle_styles}'>
+                <div class="circle">
+                    <span class="prec" id="prec">${text}</span>
+                </div>
+            </div>`
 }
