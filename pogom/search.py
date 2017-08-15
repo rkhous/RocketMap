@@ -83,7 +83,6 @@ def switch_status_printer(display_type, current_page, mainlog,
         elif command.isdigit():
             current_page[0] = int(command)
             mainlog.handlers[0].setLevel(logging.CRITICAL)
-            display_type[0] = 'workers'
         elif command.lower() == 'a':
             mainlog.handlers[0].setLevel(logging.CRITICAL)
             display_type[0] = 'account_stats'
