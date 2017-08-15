@@ -1019,6 +1019,7 @@ def search_worker_thread(args, account_queue, account_sets,
 
                 # Let account rest if it got blind (although resting won't heal it unfortunately.)
                 if args.rotate_blind and pgacc.rareless_scans >= args.rareless_scans_threshold:
+                    pgacc.shadowbanned = True
                     status['message'] = (
                         'Account {} has become blind. Rotating out.'.format(
                             account['username']))
