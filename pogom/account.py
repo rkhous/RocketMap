@@ -7,6 +7,7 @@ import time
 from threading import Lock
 from timeit import default_timer
 
+from mrmime import mrmime_pgpool_enabled
 from mrmime.pogoaccount import POGOAccount
 
 from .proxy import get_new_proxy
@@ -66,6 +67,12 @@ def setup_mrmime_account(args, status, account):
 
 
 def reset_account(account):
+    if 'pgacc' in account:
+        # One last update before account will be parked
+        if mrmime_pgpool_enabled():
+            account['pgacc'].update_pgpool()
+        del account['pgacc']
+
     account['start_time'] = time.time()
     account['session_spins'] = 0
     account['last_timestamp_ms'] = 0
