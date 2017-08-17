@@ -32,6 +32,7 @@ from sets import Set
 from threading import Thread, Lock
 
 import requests
+from mrmime import mrmime_pgpool_enabled
 from mrmime.pogoaccount import POGOAccount
 from pgoapi.hash_server import (HashServer)
 from queue import Queue, Empty
@@ -1292,6 +1293,13 @@ def search_worker_thread(args, account_queue, account_sets,
                         time.localtime(time.time() + args.scan_delay)))
                 log.debug(status['message'])
                 time.sleep(delay)
+
+            # Account got rotated out, force one last PGPool update
+            if mrmime_pgpool_enabled():
+                pgacc.update_pgpool()
+            del account['pgacc']
+            del pgacc
+
 
         # Catch any process exceptions, log them, and continue the thread.
         except Exception as e:
