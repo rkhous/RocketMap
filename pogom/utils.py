@@ -500,6 +500,9 @@ def get_args():
                         action='store_true', default=False)
     parser.add_argument('-pgpu', '--pgpool-url', default=None,
                         help='URL of PGPool account manager.')
+    parser.add_argument('-gxp', '--gain-xp',
+                        help='Do various things to let map accounts gain XP.',
+                        action='store_true', default=False)
     parser.set_defaults(DEBUG=False)
 
     args = parser.parse_args()
