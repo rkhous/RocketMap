@@ -212,15 +212,16 @@ def incubate_eggs(pgacc):
 
     pgacc.eggs = sorted(pgacc.eggs, key=lambda k: k['km_target'])
     for incubator in pgacc.incubators:
-        egg = pgacc.eggs.pop(0)
-        time.sleep(random.uniform(2.0, 4.0))
-        if request_use_item_egg_incubator(
-           pgacc, incubator['id'], egg['id']):
-            log.info('Egg #%s (%.0f km) is on incubator #%s.',
-                     egg['id'], egg['km_target'], incubator['id'])
-            pgacc.incubators.remove(incubator)
-        else:
-            log.warning('Failed to put egg on incubator #%s.', incubator['id'])
+        if pgacc.eggs:
+            egg = pgacc.eggs.pop(0)
+            time.sleep(random.uniform(2.0, 4.0))
+            if request_use_item_egg_incubator(
+               pgacc, incubator['id'], egg['id']):
+                log.info('Egg #%s (%.0f km) is on incubator #%s.',
+                         egg['id'], egg['km_target'], incubator['id'])
+                pgacc.incubators.remove(incubator)
+            else:
+                log.warning('Failed to put egg on incubator #%s.', incubator['id'])
 
     return
 
