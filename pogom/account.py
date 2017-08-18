@@ -104,6 +104,8 @@ def spin_pokestop(pgacc, account, args, fort, step_location):
     if random.random() > 0.5 or pgacc.get_stats('level', 1):
         time.sleep(random.uniform(0.8, 1.8))
         response = spin_pokestop_request(pgacc, fort, step_location)
+        if not response:
+            return False
         time.sleep(random.uniform(2, 4))  # Don't let Niantic throttle.
 
         # Check for reCaptcha.
@@ -186,6 +188,9 @@ def clear_inventory(pgacc):
             if pgacc.has_captcha():
                 log.info('Account encountered a reCaptcha.')
                 return False
+
+            if not clear_inventory_response:
+                continue
 
             clear_response = clear_inventory_response['RECYCLE_INVENTORY_ITEM']
             clear_result = clear_response.result
