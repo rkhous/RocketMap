@@ -42,7 +42,7 @@ from requests.packages.urllib3.util.retry import Retry
 import schedulers
 import terminalsize
 from .account import (AccountSet,
-                      setup_mrmime_account)
+                      setup_mrmime_account, get_account, account_failed, account_revive)
 from .captcha import captcha_overseer_thread, handle_captcha
 from .models import (parse_map, GymDetails, parse_gyms, MainWorker,
                      WorkerStatus, HashKeys)
@@ -926,7 +926,7 @@ def search_worker_thread(args, account_queue, account_sets,
             log.info(status['message'])
 
             # Get an account.
-            account = account_queue.get()
+            account = get_account(args, account_queue, status)
             # Reset account statistics tracked per loop.
             status.update(WorkerStatus.get_worker(
                 account['username'], scheduler.scan_location))
@@ -968,9 +968,8 @@ def search_worker_thread(args, account_queue, account_sets,
                             account['username'],
                             args.max_failures)
                     log.warning(status['message'])
-                    account_failures.append({'account': account,
-                                             'last_fail_time': now(),
-                                             'reason': 'failed more than {} times'.format(args.max_failures)})
+                    account_failed(args, account_failures, account,
+                                   'failed more than {} times'.format(args.max_failures))
                     # Exit this loop to get a new account and have the API
                     # recreated.
                     break
@@ -985,9 +984,7 @@ def search_worker_thread(args, account_queue, account_sets,
                         'accounts...').format(account['username'],
                                               args.max_empty)
                     log.warning(status['message'])
-                    account_failures.append({'account': account,
-                                             'last_fail_time': now(),
-                                             'reason': 'empty scans'})
+                    account_failed(args, account_failures, account, 'empty scans')
                     # Exit this loop to get a new account and have the API
                     # recreated.
                     break
@@ -1002,7 +999,7 @@ def search_worker_thread(args, account_queue, account_sets,
                             account['username'], status['proxy_url'])
                     log.warning(status['message'])
                     # Experimental, nobody did this before.
-                    account_queue.put(account)
+                    account_revive(args, account_queue, account)
                     # Exit this loop to get a new account and have the API
                     # recreated.
                     break
@@ -1015,9 +1012,7 @@ def search_worker_thread(args, account_queue, account_sets,
                             'Account {} is being rotated out to rest.'.format(
                                 account['username']))
                         log.info(status['message'])
-                        account_failures.append({'account': account,
-                                                 'last_fail_time': now(),
-                                                 'reason': 'rest interval'})
+                        account_failed(args, account_failures, account, 'rest interval')
                         break
 
                 # Let account rest if it got blind (although resting won't heal it unfortunately.)
@@ -1027,11 +1022,7 @@ def search_worker_thread(args, account_queue, account_sets,
                         'Account {} has become blind. Rotating out.'.format(
                             account['username']))
                     log.info(status['message'])
-                    account_failures.append({
-                        'account': account,
-                        'last_fail_time': now(),
-                        'reason': 'Got shadowbanned.'
-                    })
+                    account_failed(args, account_failures, account, 'shadowbanned')
                     break
 
                 # Grab the next thing to search (when available).
@@ -1315,9 +1306,7 @@ def search_worker_thread(args, account_queue, account_sets,
                 'with fresh account. See logs for details.').format(
                     account['username'])
             traceback.print_exc(file=sys.stdout)
-            account_failures.append({'account': account,
-                                     'last_fail_time': now(),
-                                     'reason': repr(e)})
+            account_failed(args, account_failures, account, repr(e))
             time.sleep(args.scan_delay)
 
 
