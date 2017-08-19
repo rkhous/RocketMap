@@ -1288,13 +1288,6 @@ def search_worker_thread(args, account_queue, account_sets,
                 log.debug(status['message'])
                 time.sleep(delay)
 
-            # Account got rotated out, force one last PGPool update
-            if mrmime_pgpool_enabled():
-                pgacc.update_pgpool()
-            del account['pgacc']
-            del pgacc
-
-
         # Catch any process exceptions, log them, and continue the thread.
         except Exception as e:
             log.error((
