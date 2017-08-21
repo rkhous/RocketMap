@@ -130,7 +130,7 @@ def log_hatched_egg(pgacc, hatched_egg):
     candy = hatched_egg['candy_awarded']
     dust = hatched_egg['stardust_awarded']
     pgacc.log_info(
-        "Hatched {:.1f}% {} from {}km egg for {} XP, {} candy, {} dust.".format(iv, pname, km, xp, candy, dust))
+        u"Hatched {:.1f}% {} from {}km egg for {} XP, {} candy, {} dust.".format(iv, pname, km, xp, candy, dust))
 
 
 def can_spin(account, max_h_spins):
