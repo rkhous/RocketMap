@@ -8,8 +8,8 @@ import time
 from pgoapi.protos.pogoprotos.inventory.item.item_id_pb2 import *
 
 from pogom.account import log, spin_pokestop_request, \
-    encounter_pokemon_request, pokestop_spinnable, incubate_eggs, clear_inventory_request, request_release_pokemon
-from pogom.utils import get_pokemon_name, in_radius
+    encounter_pokemon_request, pokestop_spinnable, clear_inventory_request
+from pogom.utils import get_pokemon_name
 
 log = logging.getLogger(__name__)
 

@@ -30,7 +30,7 @@ from pogom.pgscout import pgscout_encounter
 from pogom.gainxp import gxp_spin_stops, DITTO_CANDIDATES_IDS, is_ditto
 from . import config
 from .account import (encounter_pokemon_request,
-                      pokestop_spinnable, spin_pokestop, setup_mrmime_account, incubate_eggs)
+                      pokestop_spinnable, spin_pokestop, setup_mrmime_account, incubate_eggs, clear_pokemon)
 from .customLog import printPokemon
 from .transform import transform_from_wgs_to_gcj, get_new_coords
 from .utils import (get_pokemon_name, get_pokemon_rarity, get_pokemon_types,
@@ -1956,6 +1956,9 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
         # All of that is needed to make sure it's unique.
         encountered_pokemon = [
             (p['encounter_id'], p['spawnpoint_id']) for p in query]
+
+        # Clear Pokemon box
+        clear_pokemon(pgacc)
 
         for p in wild_pokemon:
 
