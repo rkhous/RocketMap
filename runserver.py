@@ -196,6 +196,14 @@ def main():
 
     args = get_args()
 
+    # Abort if status name is not valid.
+    regexp = re.compile('^([\w\s\-.]+)$')
+    if not regexp.match(args.status_name):
+        log.critical('Status name contains illegal characters.')
+        sys.exit(1)
+
+    set_log_and_verbosity(log)
+
     # Initialize Mr. Mime library
     mrmime_cfg = {
         # We don't want exceptions on captchas because we handle them differently.
@@ -206,14 +214,6 @@ def main():
     if args.pgpool_url:
         mrmime_cfg['pgpool_url'] = args.pgpool_url
     init_mr_mime(config_file='config/mrmime_config.json', user_cfg=mrmime_cfg)
-
-    # Abort if status name is not valid.
-    regexp = re.compile('^([\w\s\-.]+)$')
-    if not regexp.match(args.status_name):
-        log.critical('Status name contains illegal characters.')
-        sys.exit(1)
-
-    set_log_and_verbosity(log)
 
     config['parse_pokemon'] = not args.no_pokemon
     config['parse_pokestops'] = not args.no_pokestops
