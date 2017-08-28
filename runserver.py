@@ -213,7 +213,8 @@ def main():
     # Don't overwrite PGPool URL if it's only set in MrMime config JSON
     if args.pgpool_url:
         mrmime_cfg['pgpool_url'] = args.pgpool_url
-    init_mr_mime(config_file='config/mrmime_config.json', user_cfg=mrmime_cfg)
+    mrmime_config_file = os.path.join(os.path.dirname(__file__), 'config/mrmime_config.json')
+    init_mr_mime(config_file=mrmime_config_file, user_cfg=mrmime_cfg)
 
     config['parse_pokemon'] = not args.no_pokemon
     config['parse_pokestops'] = not args.no_pokestops
