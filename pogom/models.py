@@ -28,7 +28,6 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 from pogom.pgscout import pgscout_encounter
 from pogom.gainxp import gxp_spin_stops, DITTO_CANDIDATES_IDS, is_ditto
-from . import config
 from .account import (encounter_pokemon_request,
                       pokestop_spinnable, spin_pokestop, setup_mrmime_account, incubate_eggs, clear_pokemon)
 from .customLog import printPokemon
@@ -1911,10 +1910,10 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
         # necessarily need to know *how many* forts/wild/nearby were found but
         # we'd like to know whether or not *any* were found to help determine
         # if a scan was actually bad.
-        if config['parse_pokemon']:
+        if not args.no_pokemon:
             wild_pokemon += cell.wild_pokemons
 
-        if config['parse_pokestops'] or config['parse_gyms']:
+        if not args.no_pokestops or not args.no_gyms:
             forts += cell.forts
 
         wild_pokemon_count += len(cell.wild_pokemons)
@@ -1941,7 +1940,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
     ScannedLocation.update_band(scan_loc, now_date)
     just_completed = not done_already and scan_loc['done']
 
-    if wild_pokemon and config['parse_pokemon']:
+    if wild_pokemon and not args.no_pokemon:
         encounter_ids = [b64encode(str(p.encounter_id))
                          for p in wild_pokemon]
         # For all the wild Pokemon we found check if an active Pokemon is in
@@ -2151,8 +2150,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
                         })
                     wh_update_queue.put(('pokemon', wh_poke))
 
-    if forts and (config['parse_pokestops'] or config['parse_gyms']):
-        if config['parse_pokestops']:
+    if forts and (not args.no_pokestops or not args.no_gyms):
+        if not args.no_pokestops:
             stop_ids = [f.id for f in forts if f.type == 1]
             if stop_ids:
                 query = (Pokestop
@@ -2164,7 +2163,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
                      datetime(1970, 1, 1)).total_seconds())) for f in query]
 
         for f in forts:
-            if config['parse_pokestops'] and f.type == 1:  # Pokestops.
+            if not args.no_pokestops and f.type == 1:  # Pokestops.
                 if len(f.active_fort_modifier) > 0:
                     lure_expiration = (datetime.utcfromtimestamp(
                         f.last_modified_timestamp_ms / 1000.0) +
@@ -2207,7 +2206,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
                     wh_update_queue.put(('pokestop', wh_pokestop))
 
             # Currently, there are only stops and gyms.
-            elif config['parse_gyms'] and f.type == 0:
+            elif not args.no_gyms and f.type == 0:
                 b64_gym_id = b64encode(str(f.id))
                 gym_display = f.gym_display
                 raid_info = f.raid_info
@@ -2274,7 +2273,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
                             f.last_modified_timestamp_ms / 1000.0),
                 }
 
-                if config['parse_raids'] and f.type == 0:
+                if not args.no_raids and f.type == 0:
                     if f.HasField('raid_info'):
                         raids[f.id] = {
                             'gym_id': f.id,
