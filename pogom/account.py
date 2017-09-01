@@ -163,7 +163,7 @@ def spin_pokestop(pgacc, account, args, fort, step_location):
                     account['username'])
         return False
     # Set 50% Chance to spin a Pokestop.
-    if random.random() > 0.5 or pgacc.get_stats('level', 1):
+    if random.random() > 0.5 or pgacc.get_stats('level', 1) == 1:
         time.sleep(random.uniform(0.8, 1.8))
         response = spin_pokestop_request(pgacc, fort, step_location)
         if not response:
