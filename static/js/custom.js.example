@@ -66,7 +66,7 @@ $(function () {
     Store.set('processPokemonChunkSize', processPokemonChunkSize)
     Store.set('processPokemonIntervalMs', processPokemonIntervalMs)
 
-    if (typeof window.orientation !== "undefined" || isMobileDevice()) {
+    if (typeof window.orientation !== 'undefined' || isMobileDevice()) {
         Store.set('maxClusterZoomLevel', maxClusterZoomLevelMobile)
         Store.set('clusterZoomOnClick', clusterZoomOnClickMobile)
         Store.set('clusterGridSize', clusterGridSizeMobile)
