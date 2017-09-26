@@ -755,11 +755,6 @@ def get_args():
         # Prepare the IV/CP scanning filters.
         args.enc_whitelist = []
 
-        # IV/CP scanning.
-        if args.enc_whitelist_file:
-            with open(args.enc_whitelist_file) as f:
-                args.enc_whitelist = read_pokemon_ids_from_file(f)
-
         if args.pgpool_url is None:
             # Make max workers equal number of accounts if unspecified, and disable
             # account switching.
@@ -780,12 +775,6 @@ def get_args():
                       "--accountcsv to add accounts. Or use -pgpu/--pgpool-url to " +
                       "specify the URL of PGPool.")
                 sys.exit(1)
-
-        # Prepare webhook whitelist - empty list means no restrictions
-        args.webhook_whitelist = []
-        if args.webhook_whitelist_file:
-            with open(args.webhook_whitelist_file) as f:
-                args.webhook_whitelist = read_pokemon_ids_from_file(f)
 
         # create an empty set
         args.ignorelist = []
@@ -812,6 +801,19 @@ def get_args():
     args.locales_dir = 'static/dist/locales'
     args.data_dir = 'static/dist/data'
     return args
+
+
+def post_init_args(args):
+    # IV/CP scanning.
+    if args.enc_whitelist_file:
+        with open(args.enc_whitelist_file) as f:
+            args.enc_whitelist = read_pokemon_ids_from_file(f)
+
+    # Prepare webhook whitelist - empty list means no restrictions
+    args.webhook_whitelist = []
+    if args.webhook_whitelist_file:
+        with open(args.webhook_whitelist_file) as f:
+            args.webhook_whitelist = read_pokemon_ids_from_file(f)
 
 
 def now():
@@ -887,6 +889,19 @@ def get_pokemon_data(pokemon_id):
         with open(file_path, 'r') as f:
             get_pokemon_data.pokemon = json.loads(f.read())
     return get_pokemon_data.pokemon[str(pokemon_id)]
+
+
+def get_pokemon_id(pokemon_name):
+    if not hasattr(get_pokemon_id, 'ids'):
+        if not hasattr(get_pokemon_data, 'pokemon'):
+            # initialize from file
+            get_pokemon_data(1)
+
+        get_pokemon_id.ids = {}
+        for pokemon_id, data in get_pokemon_data.pokemon.iteritems():
+            get_pokemon_id.ids[data['name']] = int(pokemon_id)
+
+    return get_pokemon_id.ids.get(pokemon_name, -1)
 
 
 def get_pokemon_name(pokemon_id):
