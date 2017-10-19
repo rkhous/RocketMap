@@ -3527,7 +3527,16 @@
   "302": {
     "name": "Sableye",
     "rarity": "",
-    "types": [],
+    "types": [
+      {
+        "type": "Dark",
+        "color": "#707070"
+      },
+      {
+        "type": "Ghost",
+        "color": "#705898"
+      }
+    ],
     "spawn_rate": ""
   },
   "303": {
@@ -3833,25 +3842,45 @@
   "353": {
     "name": "Shuppet",
     "rarity": "",
-    "types": [],
+    "types": [
+      {
+        "type": "Ghost",
+        "color": "#705898"
+      }
+    ],
     "spawn_rate": ""
   },
   "354": {
     "name": "Banette",
     "rarity": "",
-    "types": [],
+    "types": [
+      {
+        "type": "Ghost",
+        "color": "#705898"
+      }
+    ],
     "spawn_rate": ""
   },
   "355": {
     "name": "Duskull",
     "rarity": "",
-    "types": [],
+    "types": [
+      {
+        "type": "Ghost",
+        "color": "#705898"
+      }
+    ],
     "spawn_rate": ""
   },
   "356": {
     "name": "Dusclops",
     "rarity": "",
-    "types": [],
+    "types": [
+      {
+        "type": "Ghost",
+        "color": "#705898"
+      }
+    ],
     "spawn_rate": ""
   },
   "357": {
