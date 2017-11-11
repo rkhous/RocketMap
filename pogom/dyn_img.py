@@ -59,7 +59,7 @@ def get_gym_icon(team, level, raidlevel, pkm, is_in_battle):
     # Battle Badge
     if is_in_battle:
         subject_lines.append('-gravity center ( {} -resize 84x84 ) -geometry +0+0 -composite'.format(
-            os.path.join(path_images, 'boom.png')))
+            os.path.join(path_gym, 'boom.png')))
         out_filename = out_filename.replace('.png', '_B.png')
 
     if not os.path.isfile(out_filename):
