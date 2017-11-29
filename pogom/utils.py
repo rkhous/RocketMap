@@ -706,7 +706,10 @@ def get_args():
         args.accounts_L30 = []
         if args.pgpool_url:
             # Request initial number of workers from PGPool
-            args.pgpool_initial_accounts = pgpool_request_accounts(args, initial=True)
+            accs = pgpool_request_accounts(args, initial=True)
+            if not isinstance(accs, list):
+                accs = [accs]
+            args.pgpool_initial_accounts = accs
             # Request L30 accounts from PGPool
             if args.highlvl_workers > 0:
                 args.accounts_L30 = pgpool_request_accounts(args, highlvl=True, initial=True)
